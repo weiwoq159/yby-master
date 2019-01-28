@@ -7,14 +7,60 @@
 */
 <template>
   <div class='SearchInput'>
-    <input type="text" placeholder='请输入' class='search_input'>
-    <i class="iconfont icon-search"></i>
+    <input
+      type="text"
+      v-model='input'
+      placeholder='请输入搜索内容'
+      class='search_input'
+      @keyup.enter='goToResult'
+    >
+    <i
+      class="iconfont icon-search"
+      @click='goToResult'
+    ></i>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'SearchInput'
+  name: 'SearchInput',
+  data () {
+    return {
+      input: '',
+      toast: ''
+    }
+  },
+  methods: {
+    goToResult () {
+      if (this.toast !== '') {
+        this.toast.close()
+        this.toast = ''
+      }
+      if (this.input === '') {
+        this.toast = this.mint.Toast({
+          message: '请输入搜索内容',
+          duration: 2000,
+          className: 'toast',
+          iconClass: 'iconfont icon-qingkong'
+        })
+        return this.toast
+      } else {
+        let params = {
+          pageNum: 1,
+          pageSize: 10,
+          keyword: this.input
+        }
+        this.$store.commit('SET_SEARCHCONTENT', params)
+        // 1. 首页搜索
+        // 2. 首页搜索结果页
+        this.$store.commit('SET_SEARCHCATEGORIES', 1)
+        this.$router.push({
+          name: 'SearchResult',
+          params
+        })
+      }
+    }
+  }
 }
 </script>
 
@@ -33,8 +79,10 @@ export default {
     .iconfont{
       position: absolute;
       right: 10px + 30px;
-      top:0px;
-      bottom: 0px;
+      top:3px;
+      padding-left: .11rem;
+      font-size: .20rem;
+      border-left: 1px solid $input-color;
     }
   }
 </style>

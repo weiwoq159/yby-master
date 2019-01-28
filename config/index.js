@@ -10,7 +10,15 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+      '/book/web/api':{
+        target: 'http://zk.1boyun.com', //测试环境
+        pathRewrite: {
+          '^/book/web/api':'/book/web/api'
+        },
+        changeOrigin: true,
+      }
+    },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
