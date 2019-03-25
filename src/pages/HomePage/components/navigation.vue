@@ -37,7 +37,11 @@ export default {
       }, {
         name: '燚精选',
         link: '/tabGroup/Selection'
-      }]
+      }, {
+        name: '燚专家',
+        link: '/Specialist'
+      }
+      ]
     }
   }
 }
@@ -45,13 +49,13 @@ export default {
 
 <style scoped lang='scss'>
 ul {
-  padding: 0 .5rem;
+  padding: 0 .25rem;
   margin-top: .2rem;
   display: flex;
   justify-content: space-between;
 }
 li{
-  padding: 0 .05rem;
+  padding: .05rem .05rem;
   border-right: 1px solid $line-color;
 }
 li:first-child {

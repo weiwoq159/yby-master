@@ -25,9 +25,17 @@ export default {
     HomePageHeader
   },
   mounted () {
+    console.log(this.$route)
+    this.$store.commit('SET_SEARCHCATEGORIES', 1)
     this.$nextTick(function () {
       console.log('首页加载完毕')
     })
+    if (this.$route.query.token) {
+      localStorage.setItem('token', this.$route.query.token)
+    } else {
+      console.log('123123')
+      console.log(this.$route.query.token)
+    }
   },
   destroyed () {
     console.log('首页销毁完毕')
@@ -36,5 +44,7 @@ export default {
 </script>
 
 <style scoped lang='scss'>
-
+.HomePage{
+  height:100%;
+}
 </style>

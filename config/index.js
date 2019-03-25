@@ -8,11 +8,22 @@ module.exports = {
   dev: {
 
     // Paths
-    assetsSubDirectory: 'static',
+    assetsSubDirectory: './static',
     assetsPublicPath: '/',
     proxyTable: {
+      // '/book/web/api':{
+      //   // target: 'https://zk.1boyun.com', //测试环境
+      //   target: 'https://zk.1boyun.com', //测试环境
+      //
+      //   pathRewrite: {
+      //     '^/book/web/api':'/book/web/api'
+      //   },
+      //   changeOrigin: true,
+      // }
       '/book/web/api':{
-        target: 'http://zk.1boyun.com', //测试环境
+        // target: 'https://zk.1boyun.com', //测试环境
+        target: 'http://zhiku-test.1boyun.com:9998', //测试环境
+
         pathRewrite: {
           '^/book/web/api':'/book/web/api'
         },
@@ -58,7 +69,7 @@ module.exports = {
     // Paths
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
-    assetsPublicPath: '/',
+    assetsPublicPath: './',
 
     /**
      * Source Maps

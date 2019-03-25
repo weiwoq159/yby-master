@@ -9,10 +9,16 @@
   <div class='SearchResult'>
     <Header></Header>
     <SearchInput></SearchInput>
-    <NoResult v-if='news.data && news.data.length === 0'></NoResult>
-    <div class="newList">
+    <NoResult v-if='news && news.length === 0'></NoResult>
+    <div
+      class="newList"
+      v-if='news && news.length !== 0'
+      v-infinite-scroll="loadMore"
+      infinite-scroll-disabled="loading"
+      infinite-scroll-distance="10"
+    >
       <NewsList
-        v-for='item in news.data'
+        v-for='item in news'
         :key='item.id'
         :news='item'
       ></NewsList>
@@ -25,6 +31,7 @@ import Header from '../common/Header'
 import SearchInput from '../common/SearchInput'
 import NoResult from './components/NoResult'
 import NewsList from '../common/newsList'
+import { mapGetters } from 'vuex'
 export default {
   name: 'SerchResult',
   components: {
@@ -35,21 +42,85 @@ export default {
   },
   data () {
     return {
-      news: []
+      news: [],
+      HRList: '',
+      page: {
+        nowPage: 1,
+        totalPage: 10
+      }
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'SearchResult'
+    ])
+  },
+  watch: {
+    SearchResult (newVal, oldVal) {
+      this.news = newVal
     }
   },
   methods: {
-    SearchResult (res) {
-      console.log(res)
-      this.news = res.data
-      console.log(res.data.data)
+    loadCallback (res) {
+      this.$store.commit('CHANGE_SEARCHRESULT', res.data)
+    },
+    loadMore () {
+      // let params = {
+      //   pageNum: this.page.nowPage + 1,
+      //   pageSize: 10,
+      //   keyword: this.$store.state.SearchContent.keyword
+      // }
+      // console.log(this.$store.state)
+      // if (this.$store.state.SearchCategories === 1) {
+      //   params = {
+      //     pageNum: this.page.nowPage + 1,
+      //     pageSize: 10,
+      //     keyword: this.$store.state.SearchContent.keyword,
+      //     category: this.$store.state.category.category
+      //   }
+      // } else if (this.$store.state.SearchCategories === 2) {
+      //   params = {
+      //     pageNum: this.page.nowPage + 1,
+      //     pageSize: 10,
+      //     keyword: this.$store.state.SearchContent.keyword,
+      //     category: this.$store.state.SearchContent.category,
+      //     areaId: this.$store.state.SearchContent.areaId
+      //   }
+      // } else if (this.$store.state.SearchCategories === 3) {
+      //   params = {
+      //     pageNum: this.page.nowPage + 1,
+      //     pageSize: 10,
+      //     keyword: this.$store.state.SearchContent.keyword,
+      //     category: this.$store.state.SearchContent.category,
+      //     classify: this.name
+      //   }
+      // }
+      if (this.page.nowPage <= this.page.totalPage) {
+        console.log(this.page.totalPage)
+        let params = {}
+        Object.keys(this.$store.state.SearchContent).forEach(val => {
+          params[val] = this.$store.state.SearchContent[val]
+        })
+        this.page.nowPage++
+        params.pageNum = this.page.nowPage
+        this.$.search(params).then(this.loadCallback)
+      } else {
+        console.log('gundongdaodi')
+      }
     }
   },
   mounted () {
-    // this.$.post('/book/web/api/book/search', this.$store.state.SearchContent)
-    //   .then(this.SearchResult)
-    this.$.get('../static/news')
-      .then(this.SearchResult)
+    this.$store.commit('SET_SEARCHCATEGORIES', 3)
+    if (this.$route.params) {
+      this.$.search(this.$store.state.SearchContent)
+      // this.$.post('/book/web/api/book/search', this.$store.state.SearchContent)
+        .then(res => {
+          console.log(res)
+          this.HRList = res
+          this.page.totalPage = Math.ceil(res.meta.total / 10)
+          this.$store.commit('SET_SEARCHRESULT', res.data)
+        })
+    }
   }
 }
 </script>

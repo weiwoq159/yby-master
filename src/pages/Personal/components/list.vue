@@ -9,6 +9,7 @@
   <div class="tab_detail_ceil">
     <div class="title">
       {{choose.title}}
+      <p class='time1'>{{choose.time}}</p>
     </div>
     <div class="user">
       <img class="AnswerPortrait" src="https://zk.1boyun.com/static/img/photo.png">
@@ -96,6 +97,13 @@ export default {
     font-size: .10rem;
     line-height: .17rem;
     color:#aaa;
+  }
+  .time1{
+    margin-top: .07rem;
+    font-size: .10rem;
+    line-height: .17rem;
+    color:#aaa;
+    text-align: left;
   }
   .more{
     text-align: center;

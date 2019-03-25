@@ -12,83 +12,159 @@
         @click='labelDis = !labelDis'
       >
         {{name}}
-        <i :class='["iconfont","icon-lowertriangle",labelDis ? "aa" : "go"]'></i>
+        <i :class='["iconfont","icon-top",labelDis ? "aa" : "go"]'></i>
       </p>
       <transition name="fade">
         <ul v-if='labelDis'>
           <li
-            v-for='item in options'
-            :key='item.category'
-            @click='changeChose(item)'
+            v-for='(item, index) in options'
+            :key='item.id'
+            @click='changeChose(item,index)'
+            :class="index===index1 ? 'SelectOne' : 'bbb'"
           >{{item.name}}</li>
           <div class="sanjiao"></div>
         </ul>
       </transition>
     </div>
     <div class="search_input">
-      <input type="text" placeholder='请输入搜索内容' v-model='input'>
+      <input type="text" placeholder='请输入搜索内容' v-model='input' @keyup.enter='SearchInput'>
       <i
         class="iconfont icon-search"
         @click='SearchInput'
-        @keyup.enter='SearchInput'
       ></i>
     </div>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 export default {
   name: 'SearchInput',
+  props: ['Province', 'data'],
   data () {
     return {
       options: [{
-        category: '1',
+        id: '1',
         name: '人力资源'
       }, {
-        category: '2',
+        id: '2',
         name: '社会保障'
       }, {
-        category: '3',
+        id: '3',
         name: '财务税收'
       }, {
-        category: '4',
+        id: '4',
         name: '公积金'
       }],
-      category: '',
+      category: null,
       input: '',
       name: '请选择',
       labelDis: false,
-      params: ''
+      params: '',
+      index1: '',
+      data1: {}
+    }
+  },
+  computed: {
+    // 使用对象展开运算符将 getter 混入 computed 对象中
+    ...mapGetters([
+      'SearchCategories',
+      'SearchContent'
+      // ...
+    ]),
+    status () {
+      return this.$store.state.SearchCategories
+    }
+  },
+  watch: {
+    Province (newVal, oldVal) {
+      this.options = newVal
+    },
+    data (newVal, oldVal) {
+      this.data1 = newVal
+      console.log('======================')
+    },
+    status (newVal, oldVal) {
+      console.log('newVal')
     }
   },
   methods: {
-    changeChose (item) {
-      this.category = item.category
+    changeChose (item, index) {
+      console.log(this.data1)
+      this.index1 = index
+      this.data1.category = item.id
+      console.log('sadfads', this.data1)
       this.name = item.name
-      console.log(this.category, this.name)
-      this.params = {
-        pageNum: 1,
-        pageSize: 10,
-        keyword: this.input,
-        category: item.category
-      }
-      this.$store.commit('SET_SEARCHCONTENT', this.params)
       this.labelDis = false
     },
     SearchInput () {
-      this.$.post('/book/web/api/book/search', this.$store.state.SearchContent)
-        .then(res => {
-          console.log(res)
-        })
+      console.log(this.status)
+      // 1.首页搜索
+      // 2.二级页面搜索
+      // 5.燚精选搜索
+      if (this.SearchCategories === 1) {
+        this.params = ''
+        this.params = {
+          pageNum: 1,
+          pageSize: 10,
+          keyword: this.input,
+          category: this.data1.category
+        }
+      } else if (this.SearchCategories === 2) {
+        this.params = ''
+        this.params = {
+          pageNum: 1,
+          pageSize: 10,
+          keyword: this.input,
+          category: this.data.category,
+          areaId: this.data1.category
+        }
+        console.log(this.params)
+      } else if (this.SearchCategories === 3) {
+        this.params = ''
+        this.params = {
+          pageNum: 1,
+          pageSize: 10,
+          keyword: this.input,
+          category: parseInt(this.data1.category)
+        }
+      } else if (this.SearchCategories === 5) {
+        this.params = ''
+        this.params = {
+          pageNum: 1,
+          pageSize: 10,
+          keyword: this.input,
+          category: parseInt(this.data1.category),
+          essence: 1
+        }
+      }
+      this.$store.commit('SET_SEARCHCONTENT', this.params)
+      this.$.search(this.$store.state.SearchContent).then(this.SearchResult)
+      // this.$.post('/book/web/api/book/search', this.$store.state.SearchContent)
+    },
+    SearchResult (res) {
+      this.$store.commit('SET_SEARCHRESULT', res.data)
+      this.$router.push({name: 'SearchResult'})
     }
   },
   mounted () {
-    console.log('搜索结果页面执行')
+    console.log('-----this.data1-----')
+    console.log(this.data1)
+    console.log('-----this.data1-----')
     let params = this.$store.state.SearchContent
     this.input = params.keyword
+    this.page = {
+      nowPage: 1,
+      totalPage: 10
+    }
     if (this.$store.state.SearchCategories === 1) {
-      this.name = '人力资源'
+      this.name = '请选择'
       this.category = '1'
+    }
+    if (this.$route.meta.category && this.$route.meta.category !== 5) {
+      this.name = '请选择省市'
+    } else {
+      this.name = '请选择'
     }
   },
   destroyed () {
@@ -98,8 +174,12 @@ export default {
 </script>
 
 <style scoped lang='scss'>
+  .SelectOne{
+    color:#409EFF!important;
+    background: #f5f7fa;
+  }
   .SearchInput{
-    padding:.14rem .13rem;
+    padding:.20rem .13rem;
     display: flex;
     justify-content: space-between;
   }
@@ -137,7 +217,7 @@ export default {
       z-index: 20;
     }
   }
-  .icon-lowertriangle{
+  .icon-top{
     position: absolute;
     right:.1rem;
     font-size: .06rem;
@@ -146,12 +226,16 @@ export default {
   .ChooseBox ul{
     position: absolute;
     background: red;
-    left:.2rem;
+    left:0rem;
     top:.4rem;
     border: 1px solid #ebeef5;
     border-radius: 4px;
     box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
     background-color: #fff;
+    max-height: 180px;
+    overflow-y: scroll;
+    width: 120px;
+    z-index: 999;
     li{
       list-style: none;
       line-height: .36rem;
@@ -161,7 +245,7 @@ export default {
       color: #606266;
       cursor: pointer;
       outline: none;
-      text-align: center;
+      text-align: left;
     }
   }
   .sanjiao{
